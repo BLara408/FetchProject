@@ -31,7 +31,7 @@ type PointsResponse struct {
 
 func main() {
 	http.HandleFunc("receipts/process", processReceipts)
-	http.HandleFunc("receipts", getPoints)
+	http.HandleFunc("receipts/{id}/points", getPoints)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 }
