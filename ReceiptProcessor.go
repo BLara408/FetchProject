@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -80,6 +82,14 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 }
 
 func calculatePointsForReceipt(receipt Receipt) int {
+	points := 0
+	retailName := strings.ReplaceAll(receipt.Retailer, " ", "")
+	points += len(retailName)
+
+	total, err := strconv.ParseFloat(receipt.Total, 64)
+	if err == nil && math.Mod(total, 1) == 0 {
+		points += 50
+	}
 
 	return 0
 }
