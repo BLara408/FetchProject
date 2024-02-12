@@ -91,5 +91,23 @@ func calculatePointsForReceipt(receipt Receipt) int {
 		points += 50
 	}
 
+	if err == nil && math.Mod(total, 0.25) == 0 {
+		points += 25
+	}
+
+	points += len(receipt.Items) / 2 * 5
+
+	for _, item := range receipt.Items {
+		trimLength := len(strings.TrimSpace(item.ShortDescription))
+		if trimLength%3 == 0 {
+			price, err := strconv.ParseFloat(item.Price, 64)
+			if err == nil {
+				points += int(math.Ceil(price * 0.2))
+			}
+
+		}
+
+	}
+
 	return 0
 }
