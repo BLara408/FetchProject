@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -107,6 +108,17 @@ func calculatePointsForReceipt(receipt Receipt) int {
 
 		}
 
+	}
+
+	purchaseDate, err := time.Parse("2003-02-01", receipt.PurchaseDate)
+	if err == nil && purchaseDate.Day()%2 != 0 {
+		points += 6
+
+	}
+
+	purchaseTime, err := time.Parse("12:08", receipt.PurchaseTime)
+	if err == nil && purchaseTime.After(time.Date(0, 1, 1, 14, 0, 0, 0, time.UTC)) && purchaseTime.Before(time.Date(0, 1, 1, 16, 0, 0, 0, time.UTC)) {
+		points += 10
 	}
 
 	return 0
