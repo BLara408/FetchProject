@@ -89,11 +89,9 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 	response := PointsResponse{Points: points}
 
 	json.NewEncoder(writer).Encode(response)
-
 }
 
 func calculatePointsForReceipt(receipt Receipt) int {
-	
 	points := 0
 	//Adding 1 point for all alphaNumeric characters
 	for _, char := range receipt.Retailer {
@@ -115,12 +113,9 @@ func calculatePointsForReceipt(receipt Receipt) int {
 	//Adding 0.2 * trimmedItemDescription length rounded
 	for _, item := range receipt.Items {
 		trimLength := len(strings.TrimSpace(item.ShortDescription))
-
 		if trimLength%3 == 0 {
 			price, err := strconv.ParseFloat(item.Price, 64)
-
 			if err != nil {
-
 				continue
 			}
 			points += int(math.Ceil(price * 0.2))
