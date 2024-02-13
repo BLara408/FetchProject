@@ -41,11 +41,10 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/receipts/process", processReceipts).Methods("POST")
 	r.HandleFunc("/receipts/{id}/points", getPoints).Methods("GET")
-
 	http.Handle("/", r)
+
 	//Running on port 8080
 	log.Fatal(http.ListenAndServe(":8080", r))
-
 }
 
 func processReceipts(writer http.ResponseWriter, request *http.Request) {
@@ -55,14 +54,15 @@ func processReceipts(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 	}
+
 	//Call to generate unique UUID
 	id := generateReceiptUUID()
+
 	//Map the receipt to ID
 	receipts[id] = receipt
 
 	response := ReceiptIDResponse{ID: id}
 	json.NewEncoder(writer).Encode(response)
-
 }
 
 func generateReceiptUUID() string {
@@ -83,6 +83,7 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "No receipt found for that id", http.StatusNotFound)
 		return
 	}
+
 	//Call to calculate the points for receipt
 	points := calculatePointsForReceipt(receipt)
 
@@ -99,17 +100,21 @@ func calculatePointsForReceipt(receipt Receipt) int {
 			points++
 		}
 	}
+
 	//Adding 50 points if the total is a round dollar amount with no cents.
 	total, err := strconv.ParseFloat(receipt.Total, 64)
 	if err == nil && math.Mod(total, 1) == 0 {
 		points += 50
 	}
+
 	//Adding 25 points if the total is a multiple of 0.25
 	if err == nil && math.Mod(total, 0.25) == 0 {
 		points += 25
 	}
+
 	//Adding 5 points for every 2 items
 	points += len(receipt.Items) / 2 * 5
+
 	//Adding 0.2 * trimmedItemDescription length rounded
 	for _, item := range receipt.Items {
 		trimLength := len(strings.TrimSpace(item.ShortDescription))
@@ -119,15 +124,15 @@ func calculatePointsForReceipt(receipt Receipt) int {
 				continue
 			}
 			points += int(math.Ceil(price * 0.2))
-
 		}
 	}
+
 	//Adding 6 points if it was purchased on an odd day
 	purchaseDate, err := time.Parse("2006-01-02", receipt.PurchaseDate)
 	if err == nil && purchaseDate.Day()%2 != 0 {
 		points += 6
-
 	}
+
 	//Adding 10 points if it was purchased between 2pm and 4pm
 	purchaseTime, err := time.Parse("15:04", receipt.PurchaseTime)
 	if err == nil && purchaseTime.After(time.Date(0, 1, 1, 14, 0, 0, 0, time.UTC)) && purchaseTime.Before(time.Date(0, 1, 1, 16, 0, 0, 0, time.UTC)) {
