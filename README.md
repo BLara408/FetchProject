@@ -25,6 +25,7 @@ docker run -p 8080:8080 fetch-project-app
 
 ### Testing
 1: Curl Commands
+
 2: Postman
 
 A unique UUID will be generated when POST http://localhost:8080/receipts/process is called.
