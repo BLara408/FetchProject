@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -48,9 +49,9 @@ func main() {
 
 func processReceipts(writer http.ResponseWriter, request *http.Request) {
 	var receipt Receipt
-	error := json.NewDecoder(request.Body).Decode(&receipt)
-	if error != nil {
-		http.Error(writer, "its not found", http.StatusBadRequest)
+	err := json.NewDecoder(request.Body).Decode(&receipt)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 	}
 
 	id := generateReceiptUUID()
@@ -74,10 +75,9 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 
 	receipt, found := receipts[id]
 	if !found {
-		http.Error(writer, "Receipt not found", http.StatusNotFound)
+		http.Error(writer, "No receipt found for that id", http.StatusNotFound)
 		return
 	}
-
 	points := calculatePointsForReceipt(receipt)
 
 	response := PointsResponse{Points: points}
@@ -88,8 +88,11 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 
 func calculatePointsForReceipt(receipt Receipt) int {
 	points := 0
-	retailName := strings.ReplaceAll(receipt.Retailer, " ", "")
-	points += len(retailName)
+	for _, char := range receipt.Retailer {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) {
+			points++
+		}
+	}
 
 	total, err := strconv.ParseFloat(receipt.Total, 64)
 	if err == nil && math.Mod(total, 1) == 0 {
@@ -104,23 +107,27 @@ func calculatePointsForReceipt(receipt Receipt) int {
 
 	for _, item := range receipt.Items {
 		trimLength := len(strings.TrimSpace(item.ShortDescription))
+
 		if trimLength%3 == 0 {
 			price, err := strconv.ParseFloat(item.Price, 64)
-			if err == nil {
-				points += int(math.Ceil(price * 0.2))
+
+			if err != nil {
+
+				continue
 			}
 
-		}
+			points += int(math.Ceil(price * 0.2))
 
+		}
 	}
 
-	purchaseDate, err := time.Parse("2003-02-01", receipt.PurchaseDate)
+	purchaseDate, err := time.Parse("2006-01-02", receipt.PurchaseDate)
 	if err == nil && purchaseDate.Day()%2 != 0 {
 		points += 6
 
 	}
 
-	purchaseTime, err := time.Parse("12:08", receipt.PurchaseTime)
+	purchaseTime, err := time.Parse("15:04", receipt.PurchaseTime)
 	if err == nil && purchaseTime.After(time.Date(0, 1, 1, 14, 0, 0, 0, time.UTC)) && purchaseTime.Before(time.Date(0, 1, 1, 16, 0, 0, 0, time.UTC)) {
 		points += 10
 	}
