@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 type Receipt struct {
@@ -36,17 +37,20 @@ type PointsResponse struct {
 var receipts = make(map[string]Receipt)
 
 func main() {
-	http.HandleFunc("receipts/process", processReceipts)
-	http.HandleFunc("receipts/{id}/points", getPoints)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r := mux.NewRouter()
+	r.HandleFunc("/receipts/process", processReceipts).Methods("POST")
+	r.HandleFunc("/receipts/{id}/points", getPoints).Methods("GET")
+
+	http.Handle("/", r)
+	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
 
 func processReceipts(writer http.ResponseWriter, request *http.Request) {
 	var receipt Receipt
-	error := json.NewDecoder(request.Body).Decode(&receipts)
+	error := json.NewDecoder(request.Body).Decode(&receipt)
 	if error != nil {
-		http.Error(writer, error.Error(), http.StatusBadRequest)
+		http.Error(writer, "its not found", http.StatusBadRequest)
 	}
 
 	id := generateReceiptUUID()
@@ -121,5 +125,5 @@ func calculatePointsForReceipt(receipt Receipt) int {
 		points += 10
 	}
 
-	return 0
+	return points
 }
