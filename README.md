@@ -19,8 +19,9 @@ docker run -p 8080:8080 fetch-project-app
 ### Option Two
 1. **Building Go executable:**
    go build -o fetch-project-app
+   
    **Running Go executable:**
-2. ./fetch-project-app
+3. ./fetch-project-app
 
 ### Testing
 1: Curl Commands
