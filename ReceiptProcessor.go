@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -37,28 +38,46 @@ type PointsResponse struct {
 var receipts = make(map[string]Receipt)
 
 func main() {
-	//Attaching the router to the correct functions. 
+	// Attaching the router to the correct functions.
 	r := mux.NewRouter()
+
+	// Serve static files from the FetchProject directory
+	fs := http.FileServer(http.Dir(`./static`))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static", loggingMiddleware(fs)))
+
 	r.HandleFunc("/receipts/process", processReceipts).Methods("POST")
 	r.HandleFunc("/receipts/{id}/points", getPoints).Methods("GET")
-	http.Handle("/", r)
-
-	//Running on port 8080
+	port := ":8080"
+	log.Printf("Starting server on port %s\n", port)
+	// Running on port 8080
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Request URL:", r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
 func processReceipts(writer http.ResponseWriter, request *http.Request) {
-	//Decode the request body and if an error is thrown return 400
+	// Decode the request body and check for required fields
 	var receipt Receipt
 	err := json.NewDecoder(request.Body).Decode(&receipt)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	//Call to generate unique UUID
+	// Check if required fields are missing
+	if receipt.Retailer == "" || receipt.PurchaseDate == "" || receipt.PurchaseTime == "" || receipt.Total == "" || len(receipt.Items) == 0 {
+		http.Error(writer, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	// Call to generate unique UUID
 	id := generateReceiptUUID()
 
-	//Map the receipt to ID
+	// Map the receipt to ID
 	receipts[id] = receipt
 
 	response := ReceiptIDResponse{ID: id}
@@ -93,51 +112,75 @@ func getPoints(writer http.ResponseWriter, request *http.Request) {
 }
 
 func calculatePointsForReceipt(receipt Receipt) int {
-	points := 0
-	//Adding 1 point for all alphaNumeric characters
-	for _, char := range receipt.Retailer {
+	points := countAlphaNumericChars(receipt.Retailer) +
+		calculateRoundDollarPoints(receipt.Total) +
+		calculateQuarterPoints(receipt.Total) +
+		calculateItemPoints(receipt.Items) +
+		calculateItemDescriptionPoints(receipt.Items) +
+		calculateOddDayPoints(receipt.PurchaseDate) +
+		calculateTimeRangePoints(receipt.PurchaseTime)
+
+	return points
+}
+func countAlphaNumericChars(s string) int {
+	count := 0
+	for _, char := range s {
 		if unicode.IsLetter(char) || unicode.IsDigit(char) {
-			points++
+			count++
 		}
 	}
+	return count
+}
 
-	//Adding 50 points if the total is a round dollar amount with no cents.
-	total, err := strconv.ParseFloat(receipt.Total, 64)
-	if err == nil && math.Mod(total, 1) == 0 {
+func calculateRoundDollarPoints(total string) int {
+	points := 0
+	if totalFloat, err := strconv.ParseFloat(total, 64); err == nil && math.Mod(totalFloat, 1) == 0 {
 		points += 50
 	}
+	return points
+}
 
-	//Adding 25 points if the total is a multiple of 0.25
-	if err == nil && math.Mod(total, 0.25) == 0 {
+func calculateQuarterPoints(total string) int {
+	points := 0
+	if totalFloat, err := strconv.ParseFloat(total, 64); err == nil && math.Mod(totalFloat, 0.25) == 0 {
 		points += 25
 	}
+	return points
+}
 
-	//Adding 5 points for every 2 items
-	points += len(receipt.Items) / 2 * 5
+func calculateItemPoints(items []Item) int {
+	return len(items) / 2 * 5
+}
 
-	//Adding 0.2 * trimmedItemDescription length rounded
-	for _, item := range receipt.Items {
+func calculateItemDescriptionPoints(items []Item) int {
+	points := 0
+	for _, item := range items {
 		trimLength := len(strings.TrimSpace(item.ShortDescription))
 		if trimLength%3 == 0 {
-			price, err := strconv.ParseFloat(item.Price, 64)
-			if err != nil {
-				continue
+			if priceFloat, err := strconv.ParseFloat(item.Price, 64); err == nil {
+				points += int(math.Ceil(priceFloat * 0.2))
 			}
-			points += int(math.Ceil(price * 0.2))
 		}
 	}
+	return points
+}
 
-	//Adding 6 points if it was purchased on an odd day
-	purchaseDate, err := time.Parse("2006-01-02", receipt.PurchaseDate)
-	if err == nil && purchaseDate.Day()%2 != 0 {
+func calculateOddDayPoints(purchaseDate string) int {
+	points := 0
+	if date, err := time.Parse("2006-01-02", purchaseDate); err == nil && date.Day()%2 != 0 {
 		points += 6
 	}
+	return points
+}
 
-	//Adding 10 points if it was purchased between 2pm and 4pm
-	purchaseTime, err := time.Parse("15:04", receipt.PurchaseTime)
-	if err == nil && purchaseTime.After(time.Date(0, 1, 1, 14, 0, 0, 0, time.UTC)) && purchaseTime.Before(time.Date(0, 1, 1, 16, 0, 0, 0, time.UTC)) {
-		points += 10
+func calculateTimeRangePoints(purchaseTime string) int {
+	points := 0
+	if time, err := time.Parse("15:04", purchaseTime); err == nil {
+		hour := time.Hour()
+		minute := time.Minute()
+		if (hour > 14 || (hour == 14 && minute >= 0)) && (hour < 16 || (hour == 16 && minute == 0)) {
+			points += 10
+		}
 	}
-
 	return points
 }

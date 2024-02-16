@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt Entry</title>
+</head>
+<body>
+    <form id="receiptForm">
+        <label for="retailer">Retailer:</label><br>
+        <input type="text" id="retailer" name="retailer"><br>
+        <label for="purchaseDate">Purchase Date:</label><br>
+        <input type="date" id="purchaseDate" name="purchaseDate"><br>
+        <label for="purchaseTime">Purchase Time:</label><br>
+        <input type="time" id="purchaseTime" name="purchaseTime"><br>
+        <label for="total">Total:</label><br>
+        <input type="text" id="total" name="total"><br>
+        <div id="items">
+            <div class="item">
+                <label for="shortDescription">Short Description:</label><br>
+                <input type="text" class="shortDescription"><br>
+                <label for="price">Price:</label><br>
+                <input type="text" class="price"><br>
+            </div>
+        </div>
+        <button type="button" onclick="addItem()">Add Item</button>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        function addItem() {
+            var itemsDiv = document.getElementById('items');
+            var itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.innerHTML = `
+                <label for="shortDescription">Short Description:</label><br>
+                <input type="text" class="shortDescription"><br>
+                <label for="price">Price:</label><br>
+                <input type="text" class="price"><br>
+            `;
+            itemsDiv.appendChild(itemDiv);
+        }
+
+        document.getElementById('receiptForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var items = Array.from(document.getElementsByClassName('item')).map(function(itemDiv) {
+                return {
+                    shortDescription: itemDiv.getElementsByClassName('shortDescription')[0].value,
+                    price: itemDiv.getElementsByClassName('price')[0].value
+                };
+            });
+
+            var receipt = {
+                retailer: document.getElementById('retailer').value,
+                purchaseDate: document.getElementById('purchaseDate').value,
+                purchaseTime: document.getElementById('purchaseTime').value,
+                total: document.getElementById('total').value,
+                items: items
+            };
+
+            fetch('/receipts/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(receipt)
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).then(function(data) {
+                console.log(data);
+                // Extract the ID from the response data
+                var id = data.id;
+                // Make a GET request to the /receipts/{id}/points endpoint
+                return fetch('/receipts/' + id + '/points');
+            }).then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).then(function(data) {
+                // Display the calculated points total on the screen
+                var points = data.points;
+                var pointsElement = document.createElement('p');
+                pointsElement.textContent = 'Calculated Points Total: ' + points;
+                document.body.appendChild(pointsElement);
+            }).catch(function(error) {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
