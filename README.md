@@ -14,7 +14,7 @@ docker build -t fetch-project-app .
 2. **Running the Docker Container:**
 docker run -p 8080:8080 fetch-project-app
 
-
+## Running with Go exectutable 
 
 ### Option Two
 1. **Building Go executable:**
