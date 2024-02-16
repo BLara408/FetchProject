@@ -1,4 +1,3 @@
-
 FROM golang:1.17-alpine AS builder
 
 # Set the working directory inside the container
@@ -18,7 +17,11 @@ FROM alpine:latest
 
 WORKDIR /root/
 
+# Copy the Go application
 COPY --from=builder /app/fetch-project-app .
+
+# Copy the static files
+COPY  ./static ./static
 
 EXPOSE 8080
 
