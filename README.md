@@ -1,4 +1,4 @@
-# Fetch Project
+#Receipt Processor Webservice
 
 This is a Go application for processing receipts and calculating points based on certain criteria.
 
