@@ -3,20 +3,17 @@
 This is a Go application for processing receipts and calculating points based on certain criteria.
 
 ## Running with Docker
-
 ### Prerequisites
 - Docker installed on your machine
 
-### Option One
 1. **Build Docker Image:**
 docker build -t fetch-project-app .
 
 2. **Running the Docker Container:**
 docker run -p 8080:8080 fetch-project-app
 
+## Running with Go exectutable 
 
-
-### Option Two
 1. **Building Go executable:**
    go build -o fetch-project-app
    
@@ -25,6 +22,7 @@ docker run -p 8080:8080 fetch-project-app
 
 ### Testing
 1: Curl Commands
+
 2: Postman
 
 A unique UUID will be generated when POST http://localhost:8080/receipts/process is called.
