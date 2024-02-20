@@ -34,7 +34,7 @@ Return
 {"id":"94891dfa-a67f-4733-9405-8177beb96384"}
 
 GET http://localhost:8080/receipts/94891dfa-a67f-4733-9405-8177beb96384/points
-## Point Calculation 
+## Point Calculation:** 
 1: One point for every alphanumeric character in the retailer name.
 2: 50 points if the total is a round dollar amount with no cents.
 3: 25 points if the total is a multiple of 0.25.
