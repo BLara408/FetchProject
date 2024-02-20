@@ -42,3 +42,6 @@ GET http://localhost:8080/receipts/94891dfa-a67f-4733-9405-8177beb96384/points
    - If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
    - 6 points if the day in the purchase date is odd.
    - 10 points if the time of purchase is after 2:00pm and before 4:00pm.
+
+## Example JSON Request Body
+![image](https://github.com/BLara408/ReceiptProcessorWebservice/assets/24239807/99560f39-417f-4305-90c1-89181e3d99fa)
