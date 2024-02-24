@@ -1,9 +1,75 @@
+/* styles.css */
+
+/* Container styles */
 body {
-    background-color: rgb(96, 99, 100);
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Align items at the center vertically */
+    height: 100vh; /* Full height of the viewport */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    font-family: 'Roboto', sans-serif; /* Updated font */
+    background-color: #f0f0f0; /* Add a background color */
 }
 
-form {
-    margin: auto;
-    width: 50%;
-    padding: 10px;
+/* Form and Card container styles */
+#receiptForm, .card-container {
+    width: 300px; /* Fixed width */
+    background-color: #ffffff; /* Updated color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 0 15px rgba(0,0,0,0.2); /* Softer shadow */
+    padding: 20px; /* Increased padding */
+    margin: 10px; /* Space around the form and the card */
+}
+
+/* Label styles */
+label {
+    font-weight: bold;
+}
+
+/* Input field styles */
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Include padding in width calculation */
+    border-radius:5px; /* Rounded corners */
+    border: 1px solid black; /* Black border */
+    padding-left :10px;
+}
+
+/* Item container styles */
+#items {
+    margin-bottom: 10px;
+}
+
+.item {
+    margin-bottom: 20px;
+}
+
+/* Points list styles */
+.card ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+/* Submit button and Add Item button style updates */
+.submit-button,
+.add-button {
+   background-color:#34a853; /* Gradient color example*/
+   color:white;
+   border:none;
+   cursor:pointer; 
+   width: 48%; /* Adjusted width for side-by-side layout */
+   padding: 8px;
+   margin-bottom: 10px;
+   box-sizing: border-box; /* Include padding in width calculation */
+   margin-right: 2%; /* Space between the buttons */
+}
+
+.submit-button:hover,
+.add-button:hover{
+   background-color:#2c8c43; /* Hover effect*/
 }

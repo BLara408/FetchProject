@@ -5,15 +5,15 @@
     <link rel="stylesheet" type = "text/css" href="styles.css">
 </head>
 <body>
-    <form id="receiptForm">
+    <form id="receiptForm" class="form">
         <label for="retailer">Retailer:</label><br>
-        <input type="text" id="retailer" name="retailer"><br>
+        <input type="text" id="retailer" name="retailer" class="input-field"><br>
         <label for="purchaseDate">Purchase Date:</label><br>
-        <input type="date" id="purchaseDate" name="purchaseDate"><br>
+        <input type="date" id="purchaseDate" name="purchaseDate" class="input-field"><br>
         <label for="purchaseTime">Purchase Time:</label><br>
-        <input type="time" id="purchaseTime" name="purchaseTime"><br>
+        <input type="time" id="purchaseTime" name="purchaseTime" class="input-field"><br>
         <label for="total">Total:</label><br>
-        <input type="text" id="total" name="total"><br>
+        <input type="text" id="total" name="total" class="input-field"><br>
         <div id="items">
             <div class="item">
                 <label for="shortDescription">Short Description:</label><br>
@@ -22,9 +22,23 @@
                 <input type="text" class="price"><br>
             </div>
         </div>
-        <button type="button" onclick="addItem()">Add Item</button>
-        <input type="submit" value="Submit">
+        <button type="button" class="submit-button" onclick="addItem()">Add Item</button>
+        <input type="submit" class="submit-button" value="Submit">
     </form>
+    <div class="card-container">
+        <div class="card">
+            <h2>Point Calculation</h2>
+            <ul>
+                <li>One point for every alphanumeric character in the retailer name.</li>
+                <li>50 points if the total is a round dollar amount with no cents.</li>
+                <li>25 points if the total is a multiple of 0.25.</li>
+                <li>5 points for every two items on the receipt.</li>
+                <li>If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.</li>
+                <li>6 points if the day in the purchase date is odd.</li>
+                <li>10 points if the time of purchase is after 2:00pm and before 4:00pm.</li>
+            </ul>
+        </div>
+    </div>
 
     <script>
         function addItem() {
