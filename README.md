@@ -1,6 +1,8 @@
 #Receipt Processor Webservice
 
 This is a Go application for processing receipts and calculating points based on certain criteria.
+## UI
+![image](https://github.com/BLara408/ReceiptProcessorWebservice/assets/24239807/b2edf87e-df4c-4b19-a9a4-be861f49e100)
 
 ## Running with Docker
 ### Prerequisites
@@ -47,3 +49,5 @@ GET http://localhost:8080/receipts/94891dfa-a67f-4733-9405-8177beb96384/points
 
 ## Example JSON Request Body
 ![image](https://github.com/BLara408/ReceiptProcessorWebservice/assets/24239807/99560f39-417f-4305-90c1-89181e3d99fa)
+
+
